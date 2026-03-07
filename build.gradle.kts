@@ -75,7 +75,7 @@ wpi {
 }
 
 // Set this to true to enable desktop support.
-val includeDesktopSupport = false
+val includeDesktopSupport = true
 
 dependencies {
     annotationProcessor(wpi.java.deps.wpilibAnnotations())
