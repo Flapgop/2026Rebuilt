@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.sultans3965.constants.OperatorConstants;
+import frc.robot.sultans3965.subsystems.ShootingSubsystem;
 import frc.robot.sultans3965.subsystems.SwerveSubsystem;
 import frc.robot.sultans3965.subsystems.vision.VisionSubsystem;
 import swervelib.SwerveInputStream;
@@ -31,6 +32,8 @@ import java.io.File;
 public class RobotContainer
 {
     private final CommandXboxController driver = new CommandXboxController(0);
+    private final CommandXboxController operator = new CommandXboxController(1);
+
     private final SwerveSubsystem swerveSubsystem = new SwerveSubsystem(new File(Filesystem.getDeployDirectory() + File.separator + "swerve"));
     private final SwerveInputStream driveAngularVelocity = SwerveInputStream.of(swerveSubsystem.swerveDrive(),
                     () -> driver.getLeftY() * -1,
@@ -59,6 +62,7 @@ public class RobotContainer
                     0));
 
     private final VisionSubsystem visionSubsystem;
+    private final ShootingSubsystem shootingSubsystem = new ShootingSubsystem();
 
     public RobotContainer(Robot robot)
     {
@@ -103,6 +107,11 @@ public class RobotContainer
         driver.back().whileTrue(Commands.none());
         driver.leftBumper().whileTrue(Commands.runOnce(swerveSubsystem::lock, swerveSubsystem).repeatedly());
         driver.rightBumper().onTrue(Commands.none());
+
+        operator.rightTrigger().onChange(shootingSubsystem.shoot(() -> -operator.getRightTriggerAxis()));
+        operator.leftBumper().onChange(shootingSubsystem.intake(() -> operator.leftBumper().getAsBoolean() ? -1.0 : 0.0));
+        operator.rightBumper().onChange(shootingSubsystem.agitate(() -> operator.rightBumper().getAsBoolean() ? -1.0 : 0.0));
+        shootingSubsystem.setDefaultCommand(shootingSubsystem.moveIntake(() -> operator.getLeftY()));
     }
     
     

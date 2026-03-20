@@ -8,13 +8,11 @@
   },
   "conversionFactors": {
     "angle": {
-      "gearRatio": 25,
-      "factor": null
+      "gearRatio": 25
     },
     "drive": {
       "diameter": 3,
-      "gearRatio": 15,
-      "factor": null
+      "gearRatio": 15
     }
   },
   "rampRate": {
