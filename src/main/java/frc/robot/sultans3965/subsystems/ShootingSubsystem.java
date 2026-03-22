@@ -2,8 +2,12 @@ package frc.robot.sultans3965.subsystems;
 
 import java.util.function.Supplier;
 
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,38 +21,20 @@ public class ShootingSubsystem extends SubsystemBase {
 
     public ShootingSubsystem() {
         shooterAgitator = new SparkMax(14, MotorType.kBrushless);
+        shooterAgitator.configure(new SparkMaxConfig().smartCurrentLimit(30).idleMode(IdleMode.kCoast), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         shooter = new SparkMax(10, MotorType.kBrushless);
         intake = new SparkMax(11, MotorType.kBrushless);
+        intake.configure(new SparkMaxConfig().smartCurrentLimit(40), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         intakeMovement = new SparkMax(12, MotorType.kBrushless);
+        intakeMovement.configure(new SparkMaxConfig().smartCurrentLimit(5), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    public void shoot(double speed) {
-        shooter.set(speed);
-    }
-
-    public Command shoot(Supplier<Double> shooterSpeedSupplier) {
+    public Command everything(Supplier<Double> intakeMovementSupplier, Supplier<Double> shooterSupplier, Supplier<Double> agitatorSupplier, Supplier<Double> intakeSupplier) {
         return run(() -> {
-            
-        });
-    }
-
-    public Command intake(Supplier<Double> intakeSpeedSupplier) {
-        return run(() -> {
-            intake.set(intakeSpeedSupplier.get());
-        });
-    }
-
-    public Command moveIntake(Supplier<Double> movementSupplier) {
-        return run(() -> {
-            double blegh = movementSupplier.get();
-            System.out.println("Setting movement to: " + blegh);
-            intakeMovement.set(blegh);
-        });
-    }
-
-    public Command agitate(Supplier<Double> agitationSupplier) {
-        return run(() -> {
-            shooterAgitator.set(agitationSupplier.get());
+            intakeMovement.set(intakeMovementSupplier.get());
+            intake.set(intakeSupplier.get());
+            shooterAgitator.set(agitatorSupplier.get());
+            shooter.set(shooterSupplier.get());
         });
     }
 }
