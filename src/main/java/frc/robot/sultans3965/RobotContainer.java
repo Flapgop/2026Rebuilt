@@ -79,30 +79,9 @@ public class RobotContainer
     private void configureBindings() {
         Command driveFieldOrientedAngularVelocity = swerveSubsystem.driveFieldOriented(driveAngularVelocity);
         swerveSubsystem.resetOdometry(new Pose2d());
-        // Command driveFieldOrientedAngularVelocityKeyboard = swerveSubsystem.driveFieldOriented(driveAngularVelocityKeyboard);
         Command visionEstimation = visionSubsystem.estimationLoop();
-        // if (!RobotBase.isSimulation()) { // TODO: simulation
-            swerveSubsystem.setDefaultCommand(driveFieldOrientedAngularVelocity);
-        //     Pose2d target = new Pose2d(new Translation2d(1, 4),
-        //             Rotation2d.fromDegrees(90));
-        //     driveDirectAngleKeyboard.driveToPose(() -> target,
-        //             new ProfiledPIDController(5,
-        //                     0,
-        //                     0,
-        //                     new TrapezoidProfile.Constraints(5, 2)),
-        //             new ProfiledPIDController(5,
-        //                     0,
-        //                     0,
-        //                     new TrapezoidProfile.Constraints(Units.degreesToRadians(360),
-        //                             Units.degreesToRadians(180))
-        //             ));
-            driver.start().onTrue(Commands.runOnce(() -> swerveSubsystem.resetOdometry(new Pose2d(3, 3, new Rotation2d()))));
-        //     driver.button(1).whileTrue(swerveSubsystem.sysIdDriveMotorCommand());
-        //     driver.button(2).whileTrue(Commands.runEnd(() -> driveDirectAngleKeyboard.driveToPoseEnabled(true),
-        //             () -> driveDirectAngleKeyboard.driveToPoseEnabled(false)));
-        // } else {
-        //     swerveSubsystem.setDefaultCommand(driveFieldOrientedAngularVelocityKeyboard);
-        // }
+        swerveSubsystem.setDefaultCommand(driveFieldOrientedAngularVelocity);
+        driver.start().onTrue(Commands.runOnce(() -> swerveSubsystem.resetOdometry(new Pose2d(3, 3, new Rotation2d()))));
         visionSubsystem.setDefaultCommand(visionEstimation);
 
         driver.a().onTrue((Commands.runOnce(swerveSubsystem::zeroGyro)));

@@ -42,6 +42,8 @@ public class Camera extends SubsystemBase {
         this.poseEstimator = new PhotonPoseEstimator(fieldLayout, robotToCam);
         this.estConsumer = estConsumer;
 
+        System.out.printf("Camera created! %s\n", camera.getName());
+
         if (Robot.isSimulation()) {
             // Create the vision system simulation which handles cameras and targets on the field.
             visionSim = new VisionSystemSim("main");
@@ -73,7 +75,7 @@ public class Camera extends SubsystemBase {
     public Command estimate() {
         return run(() -> {
             List<PhotonPipelineResult> pipelineResults = unreadVisionResults();
-            pipelineResults.parallelStream().forEach(result -> {
+            pipelineResults.stream().forEach(result -> {
                 Optional<EstimatedRobotPose> estimatedPose;
                 synchronized (poseEstimator) {
                     estimatedPose = poseEstimator.estimateCoprocMultiTagPose(result).or(() -> poseEstimator.estimateLowestAmbiguityPose(result));
