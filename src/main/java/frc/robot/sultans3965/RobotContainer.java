@@ -5,20 +5,17 @@
 
 package frc.robot.sultans3965;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -39,11 +36,13 @@ public class RobotContainer
     private final SwerveSubsystem swerveSubsystem = new SwerveSubsystem(new File(Filesystem.getDeployDirectory() + File.separator + "swerve"));
     private final SwerveInputStream driveAngularVelocity = SwerveInputStream.of(swerveSubsystem.swerveDrive(),
                     () -> driver.getLeftY(),
-                    () -> driver.getLeftX() * -1)
+                    () -> driver.getLeftX())
             .withControllerRotationAxis(driver::getRightX)
             .deadband(OperatorConstants.DEADBAND)
             .scaleTranslation(0.6)
             .allianceRelativeControl(true);
+
+    private final SendableChooser<Command> autoChooser;
 
 //     private final SwerveInputStream driveAngularVelocityKeyboard = SwerveInputStream.of(swerveSubsystem.swerveDrive(),
 //                     () -> -driver.getLeftY(),
@@ -71,6 +70,9 @@ public class RobotContainer
         configureBindings();
         DriverStation.silenceJoystickConnectionWarning(true);
         NamedCommands.registerCommand("test", Commands.print("pong!"));
+
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Selection: ", autoChooser);
     }
     
     
@@ -118,6 +120,6 @@ public class RobotContainer
     }
     
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto("Example Auto");
+        return autoChooser.getSelected();
     }
 }

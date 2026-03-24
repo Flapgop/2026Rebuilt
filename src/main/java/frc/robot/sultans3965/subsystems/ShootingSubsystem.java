@@ -31,8 +31,8 @@ public class ShootingSubsystem extends SubsystemBase {
 
     public Command everything(Supplier<Double> intakeMovementSupplier, Supplier<Double> shooterSupplier, Supplier<Double> agitatorSupplier, Supplier<Double> intakeSupplier) {
         return run(() -> {
-            intakeMovement.set(intakeMovementSupplier.get());
-            intake.set(intakeSupplier.get());
+            // intakeMovement.set(intakeMovementSupplier.get());
+            // intake.set(intakeSupplier.get());
             shooterAgitator.set(agitatorSupplier.get());
             shooter.set(shooterSupplier.get());
         });
