@@ -11,7 +11,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -44,24 +43,6 @@ public class RobotContainer
 
     private final SendableChooser<Command> autoChooser;
 
-//     private final SwerveInputStream driveAngularVelocityKeyboard = SwerveInputStream.of(swerveSubsystem.swerveDrive(),
-//                     () -> -driver.getLeftY(),
-//                     () -> -driver.getLeftX())
-//             .withControllerRotationAxis(() -> driver.getRawAxis(2))
-//             .deadband(OperatorConstants.DEADBAND)
-//             .scaleTranslation(0.8)
-//             .allianceRelativeControl(true);
-
-//     private final SwerveInputStream driveDirectAngleKeyboard     = driveAngularVelocityKeyboard.copy()
-//             .withControllerHeadingAxis(
-//                     () -> Math.sin(driver.getRawAxis(2) * Math.PI) * (Math.PI * 2),
-//                     () -> Math.cos(driver.getRawAxis(2) * Math.PI) * (Math.PI * 2)
-//             )
-//             .headingWhile(true)
-//             .translationHeadingOffset(true)
-//             .translationHeadingOffset(Rotation2d.fromDegrees(
-//                     0));
-
     private final VisionSubsystem visionSubsystem;
     private final ShootingSubsystem shootingSubsystem = new ShootingSubsystem();
 
@@ -69,7 +50,6 @@ public class RobotContainer
         visionSubsystem = new VisionSubsystem(AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField), swerveSubsystem::addVisionMeasurement);
         configureBindings();
         DriverStation.silenceJoystickConnectionWarning(true);
-        NamedCommands.registerCommand("test", Commands.print("pong!"));
 
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Selection: ", autoChooser);
@@ -81,11 +61,9 @@ public class RobotContainer
         swerveSubsystem.resetOdometry(new Pose2d());
         Command visionEstimation = visionSubsystem.estimationLoop();
         swerveSubsystem.setDefaultCommand(driveFieldOrientedAngularVelocity);
-        driver.start().onTrue(Commands.runOnce(() -> swerveSubsystem.resetOdometry(new Pose2d(3, 3, new Rotation2d()))));
         visionSubsystem.setDefaultCommand(visionEstimation);
 
         driver.a().onTrue((Commands.runOnce(swerveSubsystem::zeroGyro)));
-        driver.x().onTrue(Commands.runOnce(swerveSubsystem::addFakeVisionReading));
         driver.start().whileTrue(Commands.none());
         driver.back().whileTrue(Commands.none());
         driver.leftBumper().whileTrue(Commands.runOnce(swerveSubsystem::lock, swerveSubsystem).repeatedly());
@@ -94,8 +72,9 @@ public class RobotContainer
         shootingSubsystem.setDefaultCommand(shootingSubsystem.everything(
                 () -> operator.getLeftY(), 
                 () -> -operator.getRightTriggerAxis(), 
-                () -> Math.abs(operator.getRightTriggerAxis()) > 0.01 ? -0.8 : 0.0, 
-                () -> operator.leftBumper().getAsBoolean() ? -0.7 : 0.0));
+                () -> -operator.getLeftTriggerAxis(), 
+                () -> operator.leftBumper().getAsBoolean() ? -0.7 : 0.0
+        ));
     }
     
     public Command getAutonomousCommand() {

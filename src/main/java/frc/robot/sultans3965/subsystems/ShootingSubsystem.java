@@ -21,18 +21,18 @@ public class ShootingSubsystem extends SubsystemBase {
 
     public ShootingSubsystem() {
         shooterAgitator = new SparkMax(14, MotorType.kBrushless);
-        shooterAgitator.configure(new SparkMaxConfig().smartCurrentLimit(30).idleMode(IdleMode.kCoast), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        shooterAgitator.configure(new SparkMaxConfig().idleMode(IdleMode.kCoast), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         shooter = new SparkMax(10, MotorType.kBrushless);
         intake = new SparkMax(11, MotorType.kBrushless);
-        intake.configure(new SparkMaxConfig().smartCurrentLimit(40), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        intake.configure(new SparkMaxConfig(), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         intakeMovement = new SparkMax(12, MotorType.kBrushless);
-        intakeMovement.configure(new SparkMaxConfig().smartCurrentLimit(5), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        intakeMovement.configure(new SparkMaxConfig().smartCurrentLimit(10), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public Command everything(Supplier<Double> intakeMovementSupplier, Supplier<Double> shooterSupplier, Supplier<Double> agitatorSupplier, Supplier<Double> intakeSupplier) {
         return run(() -> {
-            // intakeMovement.set(intakeMovementSupplier.get());
-            // intake.set(intakeSupplier.get());
+            intakeMovement.set(intakeMovementSupplier.get());
+            intake.set(intakeSupplier.get());
             shooterAgitator.set(agitatorSupplier.get());
             shooter.set(shooterSupplier.get());
         });
