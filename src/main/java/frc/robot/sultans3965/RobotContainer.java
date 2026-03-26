@@ -36,7 +36,7 @@ public class RobotContainer
                     () -> driver.getLeftX())
             .withControllerRotationAxis(driver::getRightX)
             .deadband(OperatorConstants.DEADBAND)
-            .scaleTranslation(0.6)
+            .scaleTranslation(OperatorConstants.SCALE_TRANSLATION)
             .allianceRelativeControl(true);
 
     private final SendableChooser<Command> autoChooser;
@@ -66,10 +66,10 @@ public class RobotContainer
         driver.rightBumper().onTrue(Commands.none());
 
         shootingSubsystem.setDefaultCommand(shootingSubsystem.everything(
-                () -> operator.getLeftY(), 
-                () -> -operator.getRightTriggerAxis(), 
-                () -> -operator.getLeftTriggerAxis(), 
-                () -> operator.leftBumper().getAsBoolean() ? -0.85 : 0.0
+                () -> operator.getLeftY() * OperatorConstants.INTAKE_MOVEMENT_SCALE, 
+                () -> -operator.getRightTriggerAxis() * OperatorConstants.SHOOTER_POWER_SCALE, 
+                () -> -operator.getLeftTriggerAxis() * OperatorConstants.SHOOTER_INTAKE_POWER_SCALE, 
+                () -> operator.leftBumper().getAsBoolean() ? -OperatorConstants.INTAKE_POWER_SCALE : 0.0
         ));
     }
     
