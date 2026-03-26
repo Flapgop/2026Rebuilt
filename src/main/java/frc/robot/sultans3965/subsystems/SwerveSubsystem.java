@@ -7,7 +7,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -28,29 +27,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.function.Supplier;
 
-import static edu.wpi.first.units.Units.Meter;
-
 public class SwerveSubsystem extends SubsystemBase {
 
     private final SwerveDrive swerveDrive;
 
     public SwerveSubsystem(File directory) {
-        Pose2d startingPose = AllianceHelper.isBlueAlliance()
-                ? new Pose2d(new Translation2d(Meter.of(1),
-                Meter.of(4)),
-                Rotation2d.fromDegrees(0))
-                : new Pose2d(new Translation2d(Meter.of(16),
-                Meter.of(4)),
-                Rotation2d.fromDegrees(180));
         SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
 
         try {
-            swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.MAX_SPEED, startingPose);
+            swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.MAX_SPEED, Pose2d.kZero);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        swerveDrive.setHeadingCorrection(false);
-        swerveDrive.setCosineCompensator(false);
+        swerveDrive.setHeadingCorrection(true);
+        swerveDrive.setCosineCompensator(true);
         swerveDrive.setAngularVelocityCompensation(true, true, 0.1);
         swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
         setupPathPlanner();

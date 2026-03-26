@@ -3,22 +3,15 @@ package frc.robot.sultans3965.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.sultans3965.Robot;
 import frc.robot.sultans3965.constants.VisionConstants;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.simulation.PhotonCameraSim;
-import org.photonvision.simulation.SimCameraProperties;
-import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -30,9 +23,6 @@ public class Camera extends SubsystemBase {
     private final Transform3d robotToCam;
     private final PhotonPoseEstimator poseEstimator;
 
-    private final VisionSystemSim visionSim;
-    private final PhotonCameraSim cameraSim;
-
     private Matrix<N3, N1> curStdDevs;
     private final VisionSubsystem.EstimateConsumer estConsumer;
 
@@ -41,27 +31,9 @@ public class Camera extends SubsystemBase {
         this.robotToCam = robotToCam;
         this.poseEstimator = new PhotonPoseEstimator(fieldLayout, robotToCam);
         this.estConsumer = estConsumer;
+        this.curStdDevs = VisionConstants.MULTI_TAG_STD_DEVS;
 
         System.out.printf("Camera created! %s\n", camera.getName());
-
-        if (Robot.isSimulation()) {
-            // Create the vision system simulation which handles cameras and targets on the field.
-            visionSim = new VisionSystemSim("main");
-            // Add all the AprilTags inside the tag layout as visible targets to this simulated field.
-            visionSim.addAprilTags(fieldLayout);
-            // Create simulated camera properties. These can be set to mimic your actual camera.
-            var cameraProp = new SimCameraProperties();
-            cameraProp.setCalibration(960, 720, Rotation2d.fromDegrees(90));
-            cameraProp.setCalibError(0.35, 0.10);
-            cameraProp.setFPS(15);
-            cameraProp.setAvgLatencyMs(50);
-            cameraProp.setLatencyStdDevMs(15);
-            cameraSim = new PhotonCameraSim(camera, cameraProp);
-            visionSim.addCamera(cameraSim, robotToCam);
-        } else {
-            visionSim = null;
-            cameraSim = null;
-        }
     }
 
     public List<PhotonPipelineResult> unreadVisionResults() {
@@ -77,33 +49,15 @@ public class Camera extends SubsystemBase {
             List<PhotonPipelineResult> pipelineResults = unreadVisionResults();
             pipelineResults.stream().forEach(result -> {
                 Optional<EstimatedRobotPose> estimatedPose;
-                synchronized (poseEstimator) {
-                    estimatedPose = poseEstimator.estimateCoprocMultiTagPose(result).or(() -> poseEstimator.estimateLowestAmbiguityPose(result));
-                }
+                estimatedPose = poseEstimator.estimateCoprocMultiTagPose(result).or(() -> poseEstimator.estimateLowestAmbiguityPose(result));
                 updateEstimationStdDevs(estimatedPose, result.getTargets());
-                if (RobotBase.isSimulation()) {
-                    estimatedPose.ifPresentOrElse(est -> {
-                        getSimDebugField()
-                                .getObject("VisionEstimation")
-                                .setPose(est.estimatedPose.toPose2d());
-                    }, () -> {
-                        getSimDebugField().getObject("VisionEstimation").setPoses();
-                    });
-                } // TODO: simulation
 
                 estimatedPose.ifPresent(est -> {
-                    synchronized (estConsumer) {
-                        Matrix<N3, N1> estStdDevs = getEstimationStdDevs();
-                        estConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
-                    }
+                    Matrix<N3, N1> estStdDevs = getEstimationStdDevs();
+                    estConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
                 });
             });
         });
-    }
-
-    public Field2d getSimDebugField() {
-        if (!Robot.isSimulation()) return null;
-        return visionSim.getDebugField();
     }
 
     public Matrix<N3, N1> getEstimationStdDevs() {

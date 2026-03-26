@@ -6,11 +6,9 @@
 package frc.robot.sultans3965;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -58,14 +56,12 @@ public class RobotContainer
     
     private void configureBindings() {
         Command driveFieldOrientedAngularVelocity = swerveSubsystem.driveFieldOriented(driveAngularVelocity);
-        swerveSubsystem.resetOdometry(new Pose2d());
         Command visionEstimation = visionSubsystem.estimationLoop();
         swerveSubsystem.setDefaultCommand(driveFieldOrientedAngularVelocity);
         visionSubsystem.setDefaultCommand(visionEstimation);
 
-        driver.a().onTrue((Commands.runOnce(swerveSubsystem::zeroGyro)));
-        driver.start().whileTrue(Commands.none());
-        driver.back().whileTrue(Commands.none());
+        driver.start().onTrue(Commands.runOnce(swerveSubsystem::zeroGyroWithAlliance));
+        driver.back().onTrue(Commands.none());
         driver.leftBumper().whileTrue(Commands.runOnce(swerveSubsystem::lock, swerveSubsystem).repeatedly());
         driver.rightBumper().onTrue(Commands.none());
 
