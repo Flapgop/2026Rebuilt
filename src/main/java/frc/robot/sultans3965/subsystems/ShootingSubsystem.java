@@ -4,15 +4,12 @@ import java.util.function.Supplier;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -84,7 +81,6 @@ public class ShootingSubsystem extends SubsystemBase {
             double timeToTarget = (vy + Math.sqrt(discriminant)) / Constants.GRAVITY;
             estDistance = vx * timeToTarget;
         }
-        
 
         SmartDashboard.putNumber("Shooter/Actual RPM", currentRPM);
         SmartDashboard.putNumber("Shooter/Est Distance (meters)", estDistance);
