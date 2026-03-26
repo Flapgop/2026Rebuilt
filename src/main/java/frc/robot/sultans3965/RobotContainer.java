@@ -69,7 +69,7 @@ public class RobotContainer
                 () -> operator.getLeftY(), 
                 () -> -operator.getRightTriggerAxis(), 
                 () -> -operator.getLeftTriggerAxis(), 
-                () -> operator.leftBumper().getAsBoolean() ? -0.7 : 0.0
+                () -> operator.leftBumper().getAsBoolean() ? -0.85 : 0.0
         ));
     }
     
